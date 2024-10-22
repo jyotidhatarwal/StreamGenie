@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
 import Header from "./Header";
 import { validateForm } from "../utils/validateForm"
-
-
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../utils/firebase"
 const Login = () => {
 
     const [isSignedIn,setIsSignedIn] = useState(true);
@@ -14,6 +14,36 @@ const Login = () => {
         const message = validateForm(email.current.value,password.current.value);
         console.log(message);
         setErrorMessage(message);
+        if(message) return;
+        if(!isSignedIn){
+            // sign up logic
+
+        createUserWithEmailAndPassword(auth, email.current.value, password.current.value)
+                    .then((userCredential) => {
+                        const user = userCredential.user;
+                        console.log(user);
+                    })
+                    .catch((error) => {
+                        const errorCode = error.code;
+                        const errorMessages = error.message;
+                        setErrorMessage(errorCode+ " - "+ errorMessages);
+                        console.log("Inside Sign up Logic");
+                    });
+            
+        }else{
+            // sign in logic
+            signInWithEmailAndPassword(auth, email, password)
+                    .then((userCredential) => {
+                        const user = userCredential.user;
+                        console.log(user);
+                      })
+                    .catch((error) => {
+                        const errorCode = error.code;
+                        const errorMessages = error.message;
+                        setErrorMessage(errorCode+ " - "+ errorMessages);
+                        console.log("Inside sign in logic");
+                    });
+        }
     }
 
     const toggleSignInForm = () => {
@@ -30,8 +60,8 @@ const Login = () => {
                 />
             </div>
             <form onSubmit={(e) => {e.preventDefault()}} className="w-3/12 absolute p-12 bg-black my-36 mx-auto right-0 left-0 text-white rounded-lg bg-opacity-80">
-                <h1 className="font-bold text-3xl py-4">{isSignedIn ? "Sign In" : "Sign Out"}</h1>
-                {isSignedIn && (
+                <h1 className="font-bold text-3xl py-4">{isSignedIn ? "Sign In" : "Sign Up"}</h1>
+                {!isSignedIn && (
                     <input
                     type="text"
                     placeholder="Name"
@@ -56,7 +86,7 @@ const Login = () => {
 
                 <button
                  className="p-4 my-6 bg-red-700 w-full rounded-lg" onClick={handleBtnClick}
-                >{isSignedIn ? "Sign In" : "Sign Out"}</button>
+                >{isSignedIn ? "Sign In" : "Sign Up"}</button>
 
                 <p className="py-4 cursor-pointer" onClick={toggleSignInForm}>
                      {isSignedIn ?  "New to Netflix? Sign Up Now"
