@@ -1,10 +1,20 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Header from "./Header";
+import { validateForm } from "../utils/validateForm"
 
 
 const Login = () => {
 
     const [isSignedIn,setIsSignedIn] = useState(true);
+    const [errorMessage, setErrorMessage] = useState(null);
+    const email = useRef(null);
+    const password = useRef(null);
+
+    const handleBtnClick = () => {
+        const message = validateForm(email.current.value,password.current.value);
+        console.log(message);
+        setErrorMessage(message);
+    }
 
     const toggleSignInForm = () => {
         setIsSignedIn(!isSignedIn);
@@ -29,20 +39,23 @@ const Login = () => {
                     />
                 )}
                 <input
+                    ref={email}
                     type="text"
                     placeholder="Email Address"
                     className="p-4 my-4 w-full bg-gray-700"
                 />
 
                 <input
+                    ref={password}
                     type="password"
                     placeholder="Password"
                     className="p-4 my-4 w-full bg-gray-700"
                 />
 
+                <p className="text-red-500 font-bold text-lg py-2">{errorMessage}</p>
 
                 <button
-                 className="p-4 my-6 bg-red-700 w-full rounded-lg"
+                 className="p-4 my-6 bg-red-700 w-full rounded-lg" onClick={handleBtnClick}
                 >{isSignedIn ? "Sign In" : "Sign Out"}</button>
 
                 <p className="py-4 cursor-pointer" onClick={toggleSignInForm}>
