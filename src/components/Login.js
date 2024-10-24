@@ -1,14 +1,18 @@
 import { useRef, useState } from "react";
 import Header from "./Header";
 import { validateForm } from "../utils/validateForm"
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "../utils/firebase"
+import { useNavigate } from "react-router-dom";
 const Login = () => {
 
     const [isSignedIn,setIsSignedIn] = useState(true);
     const [errorMessage, setErrorMessage] = useState(null);
+    const name = useRef(null);
     const email = useRef(null);
     const password = useRef(null);
+
+    const navigate = useNavigate();
 
     const handleBtnClick = () => {
         const message = validateForm(email.current.value,password.current.value);
@@ -21,7 +25,17 @@ const Login = () => {
         createUserWithEmailAndPassword(auth, email.current.value, password.current.value)
                     .then((userCredential) => {
                         const user = userCredential.user;
-                        console.log(user);
+                        console.log("This is create user",user);
+                        updateProfile(user, {
+                            displayName: name.current.email, photoURL: "https://avatars.githubusercontent.com/u/65608438?v=4"
+                          }).then(() => {
+                            // Profile updated!
+                            navigate("/browse")
+                          }).catch((error) => {
+                            // An error occurred
+                            setErrorMessage(error.message);
+                            navigate("/error");
+                          });
                     })
                     .catch((error) => {
                         const errorCode = error.code;
@@ -32,10 +46,14 @@ const Login = () => {
             
         }else{
             // sign in logic
-            signInWithEmailAndPassword(auth, email, password)
+            signInWithEmailAndPassword(
+                auth, 
+                email.current.value,
+                password.current.value)
                     .then((userCredential) => {
                         const user = userCredential.user;
                         console.log(user);
+                        navigate("/browse");
                       })
                     .catch((error) => {
                         const errorCode = error.code;
@@ -63,6 +81,7 @@ const Login = () => {
                 <h1 className="font-bold text-3xl py-4">{isSignedIn ? "Sign In" : "Sign Up"}</h1>
                 {!isSignedIn && (
                     <input
+                    ref={name}
                     type="text"
                     placeholder="Name"
                     className="p-4 my-4 w-full bg-gray-700"
