@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { LOGO } from "../utils/constants";
 import { addUser, removeUser } from "../utils/userSlice";
 import { useEffect } from "react";
+import { toggleGptSearch } from "../utils/gptSlice";
 
 
 const Header = () => {
@@ -12,7 +13,7 @@ const Header = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const user = useSelector((store) => store.user);
-    console.log("This is header user", user);
+    const showGptSearch = useSelector((store) => store.gpt.showGptSearch);
 
     const handleSignOut = () => {
         signOut(auth).then(() => {
@@ -21,6 +22,10 @@ const Header = () => {
             // An error happened.
             navigate("/error");
           });
+    }
+
+    const handleGptSearchClick = () => {
+      dispatch(toggleGptSearch());
     }
 
     useEffect(()=> {
@@ -51,6 +56,13 @@ const Header = () => {
             <img src= {LOGO}
                 alt="netflix-logo"
                 className="w-44" />
+
+            <button
+            className="py-2 px-4 mx-4 my-2 bg-purple-800 text-white rounded-lg"
+            onClick={handleGptSearchClick}
+            >
+            {showGptSearch ? "Back" : "GPT Search"}
+            </button>
 
             {user && 
             (
