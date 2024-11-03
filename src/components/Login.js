@@ -3,7 +3,7 @@ import Header from "./Header";
 import { validateForm } from "../utils/validateForm"
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "../utils/firebase"
-import { USER_PHOTO } from "../utils/constants";
+import { BG_PHOTO_URL, USER_PHOTO } from "../utils/constants";
 import { useDispatch } from "react-redux";
 const Login = () => {
 

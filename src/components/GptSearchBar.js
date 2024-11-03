@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { useDispatch } from "react-redux";
 import { addGptMovies } from "../utils/gptSlice";
-import openai from "../utils/openai";
+import {API_OPTIONS, GEMINI_API_KEY} from "../utils/API_Auths"
 
 const GptSearchBar = () => {
 
@@ -25,21 +25,26 @@ const GptSearchBar = () => {
         searchText.current.value +
         ". only give me names of 5 movies, comma seperated like the example result given ahead. Example Result: Don 2, Heropanti, Captain America, Golmaal, Koi Mil Gaya";
 
-        const gptResults = await openai.chat.completions.create({
-            messages: [{ role: "user", content: gptQuery }],
-            model: "gpt-3.5-turbo",
-          });
-          console.log(gptResults.choices?.[0]?.message?.content);
-          // Andaz Apna Apna, Hera Pheri, Chupke Chupke, Jaane Bhi Do Yaaro, Padosan
-          const gptMovies = gptResults.choices?.[0]?.message?.content.split(",");
-          // ["Andaz Apna Apna", "Hera Pheri", "Chupke Chupke", "Jaane Bhi Do Yaaro", "Padosan"]
-          // For each movie I will search TMDB API
-          const promiseArray = gptMovies.map((movie) => getSearchGptMovies(movie));
+        const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-          const tmdbResults = await Promise.all(promiseArray);
-          console.log(tmdbResults);
+        const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        
+        const result = await model.generateContent(gptQuery);
+        console.log("Result->", result);
+        console.log(result.response.text());
+        const gptMovies = result.response.text().split(", ");
+      
+           // Andaz Apna Apna, Hera Pheri, Chupke Chupke, Jaane Bhi Do Yaaro, Padosan
+       
+           // ["Andaz Apna Apna", "Hera Pheri", "Chupke Chupke", "Jaane Bhi Do Yaaro", "Padosan"]
+           // For each movie I will search TMDB API
+           const promiseArray = gptMovies.map((movie) => getSearchGptMovies(movie));
 
-          dispatch(addGptMovies({movieNames: gptMovies, movieResults: tmdbResults}));
+           const tmdbResults = await Promise.all(promiseArray);
+           console.log(tmdbResults);
+
+           dispatch(addGptMovies({movieNames: gptMovies, movieResults: tmdbResults}));
           
     }
     console.log("Inside GPT Search bar");
